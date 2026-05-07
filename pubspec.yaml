@@ -1,0 +1,31 @@
+name: wifi_router_finder
+description: A simple Android app that helps you locate your WiFi router using signal strength.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Material Design icons (the cupertino pack ships with new Flutter projects).
+  cupertino_icons: ^1.0.6
+
+  # Lets us scan nearby WiFi networks on Android.
+  # https://pub.dev/packages/wifi_scan
+  wifi_scan: ^0.4.1+1
+
+  # Asks the user for runtime permissions (location, etc.).
+  # https://pub.dev/packages/permission_handler
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
