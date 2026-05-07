@@ -6,7 +6,7 @@
 //   2. SignalMeterScreen  - shows a big "compass" meter for one network so the
 //                           user can walk around and find the physical router.
 //
-// Read the comments top-to-bottom in order, like a tutorial.
+
 // =============================================================================
 
 import 'dart:async';

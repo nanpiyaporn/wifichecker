@@ -9,8 +9,6 @@
 //    yellow = okay
 //    green  = strong signal
 //
-// After 6-12 taps you get a quick visual map of where reception is good and
-// where it's weak.
 // =============================================================================
 
 import 'dart:async';
