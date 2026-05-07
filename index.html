@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wi-Fi Signal Checker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px 20px;
+      transition: background-color 1s;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 5px;
+    }
+
+    /* Wi-Fi name badge at the top */
+    #wifi-badge {
+      display: inline-block;
+      background-color: #333;
+      color: white;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 0.95em;
+      margin: 10px 0 20px 0;
+    }
+
+    #wifi-badge span {
+      font-weight: bold;
+      color: #7dd3fc;
+    }
+
+    /* Big color circle */
+    #signal-circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      margin: 20px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3em;
+      font-weight: bold;
+      color: white;
+      transition: background-color 1s;
+      background-color: #aaa;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    #circle-speed {
+      font-size: 1.6em;
+    }
+
+    #circle-label {
+      font-size: 0.85em;
+      margin-top: 4px;
+      opacity: 0.9;
+    }
+
+    #last-updated {
+      color: gray;
+      font-size: 0.85em;
+      margin-top: 8px;
+    }
+
+    /* Auto-refresh countdown */
+    #countdown {
+      font-size: 0.85em;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    /* Save room section */
+    .save-section {
+      margin-top: 25px;
+    }
+
+    .save-section input {
+      padding: 8px 12px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-right: 8px;
+      width: 180px;
+    }
+
+    .save-section button {
+      padding: 8px 16px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+
+    .save-section button:hover {
+      background-color: #555;
+    }
+
+    /* Clear button */
+    #clear-btn {
+      margin-top: 10px;
+      padding: 6px 14px;
+      font-size: 0.85em;
+      border-radius: 8px;
+      border: none;
+      background-color: #e57373;
+      color: white;
+      cursor: pointer;
+    }
+
+    #clear-btn:hover {
+      background-color: #c62828;
+    }
+
+    /* Saved rooms list */
+    #room-list {
+      margin-top: 30px;
+      text-align: left;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #room-list h3 {
+      margin-bottom: 10px;
+      font-size: 1.1em;
+      color: #333;
+    }
+
+    .room-entry {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      background: white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      font-size: 0.95em;
+    }
+
+    .room-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .room-time {
+      color: gray;
+      font-size: 0.8em;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* Color legend */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 25px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9em;
+    }
+
+    .legend-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
+
+    /* No rooms message */
+    #no-rooms-msg {
+      color: #aaa;
+      font-size: 0.9em;
+      text-align: center;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📶 Wi-Fi Signal Checker</h1>
+
+  <!-- Wi-Fi name badge -->
+  <div id="wifi-badge">
+    📡 Network: <span>My Wi-Fi</span>
+  </div>
+
+  <p style="color:#555; font-size:0.9em;">
+    Auto-checks signal every 3 seconds. No password needed.
+  </p>
+
+  <!-- Big signal circle -->
+  <div id="signal-circle">
+    <div id="circle-speed">--</div>
+    <div id="circle-label">Checking...</div>
+  </div>
+
+  <div id="last-updated">Last updated: --</div>
+  <div id="countdown">Next check in 3s...</div>
+
+  <!-- Save room -->
+  <div class="save-section">
+    <input id="roomName" placeholder="e.g. Bedroom, Kitchen" />
+    <button onclick="saveRoom()">💾 Save Room</button>
+  </div>
+
+  <!-- Saved rooms -->
+  <div id="room-list">
+    <h3>📋 Saved Rooms — My Wi-Fi</h3>
+    <div id="entries">
+      <div id="no-rooms-msg">No rooms saved yet. Walk to a room and save it!</div>
+    </div>
+    <button id="clear-btn" onclick="clearRooms()" style="display:none;">
+      🗑️ Clear All Rooms
+    </button>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#4caf50;"></div> Strong (10+ Mbps)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#ff9800;"></div> Medium (3–10 Mbps)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#f44336;"></div> Weak (0–3 Mbps)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#9e9e9e;"></div> No Connection
+    </div>
+  </div>
+
+  <script>
+    // --- Measure real speed ---
+    async function measureSpeed() {
+      const imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png";
+      const imageSizeBytes = 20000;
+
+      const startTime = performance.now();
+      try {
+        await fetch(imageUrl + "?nocache=" + Math.random(), { cache: "no-store" });
+        const endTime = performance.now();
+        const durationSeconds = (endTime - startTime) / 1000;
+        const speedMbps = ((imageSizeBytes * 8) / durationSeconds) / 1_000_000;
+        return Math.round(speedMbps * 10) / 10;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // --- Decide color and label based on speed ---
+    function getSignalInfo(speed) {
+      if (speed === null) {
+        return { color: "#9e9e9e", label: "No Connection 📵", bg: "#f5f5f5" };
+      } else if (speed >= 10) {
+        return { color: "#4caf50", label: "Strong 💪",        bg: "#e8f5e9" };
+      } else if (speed >= 3) {
+        return { color: "#ff9800", label: "Medium 😐",        bg: "#fff3e0" };
+      } else {
+        return { color: "#f44336", label: "Weak 😟",          bg: "#ffebee" };
+      }
+    }
+
+    // Keep track of current signal info so Save Room can use it
+    let currentSpeed = null;
+    let currentInfo  = getSignalInfo(null);
+
+    // --- Update the display ---
+    async function updateSignal() {
+      document.getElementById("circle-label").innerText = "Checking...";
+
+      const speed = await measureSpeed();
+      const info  = getSignalInfo(speed);
+
+      // Save globally so saveRoom() can read it
+      currentSpeed = speed;
+      currentInfo  = info;
+
+      // Circle
+      const circle = document.getElementById("signal-circle");
+      circle.style.backgroundColor = info.color;
+      document.getElementById("circle-speed").innerText =
+        speed !== null ? speed + " Mbps" : "Offline";
+      document.getElementById("circle-label").innerText = info.label;
+
+      // Page background
+      document.body.style.backgroundColor = info.bg;
+
+      // Timestamp
+      const now = new Date();
+      document.getElementById("last-updated").innerText =
+        "Last updated: " + now.toLocaleTimeString();
+    }
+
+    // --- Countdown timer display ---
+    let secondsLeft = 3;
+    function updateCountdown() {
+      document.getElementById("countdown").innerText =
+        "Next check in " + secondsLeft + "s...";
+      secondsLeft--;
+      if (secondsLeft < 0) secondsLeft = 3;
+    }
+
+    // --- Save a room ---
+    function saveRoom() {
+      const roomName = document.getElementById("roomName").value.trim();
+      if (!roomName) {
+        alert("Please type a room name first!");
+        return;
+      }
+
+      // Remove the "no rooms" message if it's still showing
+      const noMsg = document.getElementById("no-rooms-msg");
+      if (noMsg) noMsg.remove();
+
+      const speedText = currentSpeed !== null ? currentSpeed + " Mbps" : "Offline";
+
+      const entry = document.createElement("div");
+      entry.className = "room-entry";
+      entry.innerHTML = `
+        <div class="room-dot" style="background:${currentInfo.color};"></div>
+        <div>
+          <strong>${roomName}</strong><br>
+          <span style="font-size:0.85em; color:#555;">
+            My Wi-Fi &nbsp;|&nbsp; ${speedText} &nbsp;|&nbsp; ${currentInfo.label}
+          </span>
+        </div>
+        <div class="room-time">${new Date().toLocaleTimeString()}</div>
+      `;
+
+      document.getElementById("entries").appendChild(entry);
+      document.getElementById("roomName").value = "";
+
+      // Show clear button once there is at least one entry
+      document.getElementById("clear-btn").style.display = "inline-block";
+    }
+
+    // --- Clear all rooms ---
+    function clearRooms() {
+      if (!confirm("Clear all saved rooms?")) return;
+      document.getElementById("entries").innerHTML =
+        '<div id="no-rooms-msg">No rooms saved yet. Walk to a room and save it!</div>';
+      document.getElementById("clear-btn").style.display = "none";
+    }
+
+    // --- Start everything ---
+    updateSignal();
+    setInterval(updateSignal, 3000);
+    setInterval(updateCountdown, 1000);
+  </script>
+
+</body>
+</html>
